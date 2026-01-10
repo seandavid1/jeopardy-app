@@ -16,8 +16,7 @@ import {
   Grid,
   Chip,
   ToggleButton,
-  ToggleButtonGroup,
-  Tooltip
+  ToggleButtonGroup
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import HomeIcon from '@mui/icons-material/Home';
@@ -45,10 +44,8 @@ import { getMissedQuestions } from '../services/missedQuestionsDB-firebase';
 import { getArchivedMissedQuestionIds, archiveMissedQuestion } from '../services/archivedMissedQuestionsDB-firebase';
 import { allFlashcardDecks, getFlashcardDecksByCategory } from '../flashcard-decks';
 import { useAuth } from '../contexts/AuthContext';
-import { checkAndUnlockTrophies, getUserTrophyCase } from '../services/trophyService';
 import { recordFlashcardCompletion } from '../services/flashcardCompletionsDB-firebase';
-import TrophyUnlockReveal from './TrophyUnlockReveal';
-import { getTrophyById } from '../config/trophies';
+import { checkAndUnlockTrophies } from '../services/trophyService';
 
 const BackgroundContainer = styled(Box)(({ theme }) => ({
   position: 'fixed',
@@ -126,34 +123,9 @@ function Practice({ onReturnToStart }) {
   const [selectedDeckCategory, setSelectedDeckCategory] = useState('all');
   const [selectedDifficulties, setSelectedDifficulties] = useState(['easy', 'medium', 'hard']); // Array to hold multiple selections
 
-  // Timing states for speed challenge
-  const [cardStartTime, setCardStartTime] = useState(null); // When current card was shown
-  const [sessionStartTime, setSessionStartTime] = useState(null); // When session started
-  const [cardTimes, setCardTimes] = useState([]); // Array of time taken for each card
-  const [currentCardElapsed, setCurrentCardElapsed] = useState(0); // Live elapsed time for current card
-
   // Missed questions state
   const [missedQuestionsDeck, setMissedQuestionsDeck] = useState(null);
   const [loadingMissedQuestions, setLoadingMissedQuestions] = useState(true);
-
-  // Trophy unlock state
-  const [unlockedTrophies, setUnlockedTrophies] = useState([]);
-  const [showTrophyReveal, setShowTrophyReveal] = useState(false);
-  const [userTrophyCase, setUserTrophyCase] = useState(null);
-
-  // Update current card elapsed time (for live display)
-  useEffect(() => {
-    if (!cardStartTime || !studyStarted || showSummary) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      const elapsed = (Date.now() - cardStartTime) / 1000;
-      setCurrentCardElapsed(elapsed);
-    }, 100); // Update every 100ms for smooth display
-
-    return () => clearInterval(interval);
-  }, [cardStartTime, studyStarted, showSummary]);
 
   // Load all questions on mount
   useEffect(() => {
@@ -189,9 +161,9 @@ function Practice({ onReturnToStart }) {
         // Create a set for quick exclusion checking
         const excludedSet = new Set(excludedIds);
         
-        // Apply overrides and filter out excluded questions and empty clues
+        // Apply overrides and filter out excluded questions
         const questionsWithOverrides = combined
-          .filter(q => !excludedSet.has(q.id) && !q.isEmpty) // Filter out excluded and empty
+          .filter(q => !excludedSet.has(q.id)) // Filter out excluded
           .map(q => {
             if (overrideMap[q.id]) {
               return {
@@ -213,10 +185,9 @@ function Practice({ onReturnToStart }) {
         setTopLevelCategories(uniqueTopCategories);
       } catch (error) {
         console.error('Error loading overrides/exclusions:', error);
-        // Fallback: use questions without overrides (but still filter out empty clues)
-        const nonEmptyQuestions = combined.filter(q => !q.isEmpty);
-        setAllQuestions(nonEmptyQuestions);
-        const uniqueTopCategories = [...new Set(nonEmptyQuestions.map(q => q.topLevelCategory))].sort();
+        // Fallback: use questions without overrides
+        setAllQuestions(combined);
+        const uniqueTopCategories = [...new Set(combined.map(q => q.topLevelCategory))].sort();
         setTopLevelCategories(uniqueTopCategories);
       }
       
@@ -297,22 +268,6 @@ function Practice({ onReturnToStart }) {
     };
 
     loadMissedQuestions();
-  }, [user]);
-
-  // Load user's trophy case to display trophies on flashcard decks
-  useEffect(() => {
-    const loadTrophyCase = async () => {
-      if (user) {
-        try {
-          const trophyCase = await getUserTrophyCase(user.uid);
-          setUserTrophyCase(trophyCase);
-        } catch (error) {
-          console.error('Error loading trophy case:', error);
-        }
-      }
-    };
-    
-    loadTrophyCase();
   }, [user]);
 
   // Update sub-categories when top category changes
@@ -418,14 +373,6 @@ function Practice({ onReturnToStart }) {
       setMissedCardIds(new Set());
       setShowSummary(false);
       setIsReviewMode(false);
-      
-      // Initialize timing for speed challenge
-      const now = Date.now();
-      setSessionStartTime(now);
-      setCardStartTime(now);
-      setCardTimes([]);
-      setCurrentCardElapsed(0);
-      
       setStudyStarted(true);
     }
   };
@@ -457,36 +404,45 @@ function Practice({ onReturnToStart }) {
     setShowSummary(false);
     setIsReviewMode(false);
     setShowDifficultySelector(false);
-    
-    // Initialize timing for speed challenge
-    const now = Date.now();
-    setSessionStartTime(now);
-    setCardStartTime(now);
-    setCardTimes([]);
-    
     setStudyStarted(true);
   };
 
   const handleNextCard = async () => {
-    // Record time for the card we're leaving
-    if (cardStartTime) {
-      const timeSpent = (Date.now() - cardStartTime) / 1000; // Convert to seconds
-      setCardTimes(prev => [...prev, timeSpent]);
-    }
-    
     if (currentCardIndex < studyCards.length - 1) {
       setCurrentCardIndex(prev => prev + 1);
-      // Start timing for next card
-      setCardStartTime(Date.now());
-      setCurrentCardElapsed(0); // Reset display
     } else {
       // Reached the end - show summary
       setShowSummary(true);
-      setCardStartTime(null); // Stop timing
-      setCurrentCardElapsed(0);
       
-      // Trophy unlock is handled in handleMarkCorrect to avoid race condition
-      // with state updates
+      // Check if user got perfect score and record completion
+      if (user && selectedDeck && correctCardIds.size === studyCards.length && missedCardIds.size === 0) {
+        try {
+          console.log(`🎯 Perfect score on ${selectedDeck.id}! Recording completion...`);
+          
+          // Record the completion in Firebase
+          await recordFlashcardCompletion(
+            user.uid,
+            selectedDeck.id,
+            isReversed,
+            null, // averageSecondsPerCard - we don't track time yet
+            studyCards.length
+          );
+          
+          // Check for trophy unlocks
+          const unlockedTrophies = await checkAndUnlockTrophies(user.uid, {
+            type: 'flashcard_perfect',
+            deckId: selectedDeck.id,
+            isReversed: isReversed
+          });
+          
+          if (unlockedTrophies && unlockedTrophies.length > 0) {
+            console.log('🏆 Trophies unlocked:', unlockedTrophies);
+            // TODO: Show trophy unlock animation/notification
+          }
+        } catch (error) {
+          console.error('Error recording flashcard completion or checking trophies:', error);
+        }
+      }
     }
   };
 
@@ -504,87 +460,22 @@ function Practice({ onReturnToStart }) {
     setCurrentCardIndex(studyCards.length - 1);
   };
 
-  const handleMarkCorrect = () => {
+  const handleMarkCorrect = async () => {
     const currentCard = studyCards[currentCardIndex];
-    const isLastCard = currentCardIndex === studyCards.length - 1;
-    
-    // Record time for current card before moving on
-    let currentCardTime = null;
-    if (cardStartTime) {
-      currentCardTime = (Date.now() - cardStartTime) / 1000; // Convert to seconds
-    }
-    
-    // Update both sets
     setCorrectCardIds(prev => {
       const newSet = new Set(prev);
       newSet.add(currentCard.id);
       return newSet;
     });
-    
     setMissedCardIds(prev => {
       const newSet = new Set(prev);
       newSet.delete(currentCard.id); // Remove from missed if it was there
-      
-      // If this is the last card and we have no misses, check for trophy
-      if (isLastCard && user && newSet.size === 0) {
-        // Use setTimeout to ensure state has updated and summary is showing
-        setTimeout(async () => {
-          try {
-            console.log('🏆 Last card marked correct! Checking for flashcard trophy unlock...');
-            
-            // Calculate final timing stats (include current card time)
-            const allCardTimes = currentCardTime ? [...cardTimes, currentCardTime] : cardTimes;
-            const averageSecondsPerCard = allCardTimes.length > 0 
-              ? allCardTimes.reduce((sum, time) => sum + time, 0) / allCardTimes.length 
-              : null;
-            
-            console.log('🏆 Trophy check conditions:');
-            console.log('  - User logged in:', !!user);
-            console.log('  - Missed cards:', newSet.size);
-            console.log('  - Total cards:', studyCards.length);
-            console.log('  - Selected deck:', selectedDeck?.id);
-            console.log('  - Is reversed:', isReversed);
-            console.log('  - Average time per card:', averageSecondsPerCard ? `${averageSecondsPerCard.toFixed(2)}s` : 'N/A');
-            
-            // Record the completion in Firebase (with timing)
-            await recordFlashcardCompletion(
-              user.uid, 
-              selectedDeck?.id, 
-              isReversed,
-              averageSecondsPerCard,
-              studyCards.length
-            );
-            
-            const newTrophies = await checkAndUnlockTrophies(user.uid, {
-              type: 'flashcard_perfect',
-              deckId: selectedDeck?.id
-            });
-            
-            console.log('🏆 Trophy service returned:', newTrophies);
-            
-            if (newTrophies && newTrophies.length > 0) {
-              setUnlockedTrophies(newTrophies);
-              // Delay showing trophy reveal to allow summary to render first
-              setTimeout(() => {
-                setShowTrophyReveal(true);
-              }, 500);
-              console.log(`🎉 Unlocked ${newTrophies.length} flashcard trophy/trophies!`);
-            } else {
-              console.log('🏆 No new trophies unlocked (may already be unlocked)');
-            }
-          } catch (error) {
-            console.error('Error checking flashcard trophies:', error);
-          }
-        }, 100);
-      }
-      
       return newSet;
     });
-    
-    handleNextCard();
+    await handleNextCard();
   };
 
-  const handleMarkMissed = () => {
+  const handleMarkMissed = async () => {
     const currentCard = studyCards[currentCardIndex];
     setMissedCardIds(prev => {
       const newSet = new Set(prev);
@@ -601,7 +492,7 @@ function Practice({ onReturnToStart }) {
       newSet.delete(currentCard.id); // Remove from archived if it was there
       return newSet;
     });
-    handleNextCard();
+    await handleNextCard();
   };
 
   const handleArchiveCard = async () => {
@@ -634,11 +525,11 @@ function Practice({ onReturnToStart }) {
           return newSet;
         });
         
-        handleNextCard();
+        await handleNextCard();
       } catch (error) {
         console.error('Error archiving question:', error);
         // Still proceed to next card even if archive fails
-        handleNextCard();
+        await handleNextCard();
       }
     } else {
       // Not a missed question, just mark as archived locally
@@ -647,7 +538,7 @@ function Practice({ onReturnToStart }) {
         newSet.add(currentCard.id);
         return newSet;
       });
-      handleNextCard();
+      await handleNextCard();
     }
   };
 
@@ -669,11 +560,6 @@ function Practice({ onReturnToStart }) {
     setCorrectCardIds(new Set());
     setMissedCardIds(new Set());
     setArchivedCardIds(new Set());
-  };
-  
-  const handleTrophyRevealContinue = () => {
-    setShowTrophyReveal(false);
-    setUnlockedTrophies([]);
   };
 
   const handleToggleShuffleMode = () => {
@@ -711,11 +597,6 @@ function Practice({ onReturnToStart }) {
     setIsShuffleMode(false);
     setIsReversed(false);
     setSelectedDeckCategory('all');
-    
-    // Reset timing
-    setSessionStartTime(null);
-    setCardStartTime(null);
-    setCardTimes([]);
   };
 
   const handleBackToDeckSelection = () => {
@@ -770,7 +651,7 @@ function Practice({ onReturnToStart }) {
       const excludedSet = new Set(excludedIds);
       
       const questionsWithOverrides = combined
-        .filter(q => !excludedSet.has(q.id) && !q.isEmpty) // Filter out excluded and empty
+        .filter(q => !excludedSet.has(q.id))
         .map(q => {
           if (overrideMap[q.id]) {
             return {
@@ -1223,105 +1104,46 @@ function Practice({ onReturnToStart }) {
                 {/* Regular flashcard decks */}
                 {allFlashcardDecks
                   .filter(deck => selectedDeckCategory === 'all' || deck.category === selectedDeckCategory)
-                  .map((deck) => {
-                    // Get all trophies for this deck (bronze, silver, gold)
-                    const bronzeTrophyId = `flashcard-perfect-${deck.id}`;
-                    const silverTrophyId = `flashcard-perfect-both-${deck.id}`;
-                    const goldTrophyId = `flashcard-speed-${deck.id}`;
-                    
-                    // Check which trophies are unlocked
-                    const bronzeUnlocked = userTrophyCase?.trophies?.find(t => t.trophyId === bronzeTrophyId)?.isUnlocked;
-                    const silverUnlocked = userTrophyCase?.trophies?.find(t => t.trophyId === silverTrophyId)?.isUnlocked;
-                    const goldUnlocked = userTrophyCase?.trophies?.find(t => t.trophyId === goldTrophyId)?.isUnlocked;
-                    
-                    // Determine highest trophy to display (Gold > Silver > Bronze)
-                    let displayTrophy = null;
-                    let displayTrophyUnlocked = false;
-                    
-                    if (goldUnlocked) {
-                      displayTrophy = getTrophyById(goldTrophyId);
-                      displayTrophyUnlocked = true;
-                    } else if (silverUnlocked) {
-                      displayTrophy = getTrophyById(silverTrophyId);
-                      displayTrophyUnlocked = true;
-                    } else if (bronzeUnlocked) {
-                      displayTrophy = getTrophyById(bronzeTrophyId);
-                      displayTrophyUnlocked = true;
-                    }
-                    
-                    return (
-                      <Grid item xs={12} sm={6} md={4} key={deck.id}>
-                        <Card 
-                          sx={{ 
-                            height: '100%',
-                            backgroundColor: '#f5f5f5',
-                            border: '2px solid #0f258f',
-                            transition: 'transform 0.2s',
-                            position: 'relative',
-                            '&:hover': {
-                              transform: 'translateY(-3px)',
-                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                            }
-                          }}
+                  .map((deck) => (
+                    <Grid item xs={12} sm={6} md={4} key={deck.id}>
+                      <Card 
+                        sx={{ 
+                          height: '100%',
+                          backgroundColor: '#f5f5f5',
+                          border: '2px solid #0f258f',
+                          transition: 'transform 0.2s',
+                          '&:hover': {
+                            transform: 'translateY(-3px)',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                          }
+                        }}
+                      >
+                        <CardActionArea 
+                          onClick={() => handleSelectDeck(deck)}
+                          sx={{ height: '100%', p: 2 }}
                         >
-                          {/* Trophy thumbnail in top right */}
-                          {displayTrophyUnlocked && displayTrophy && (
-                            <Tooltip title={displayTrophy.name} arrow>
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  top: 8,
-                                  right: 8,
-                                  width: 40,
-                                  height: 40,
-                                  backgroundColor: displayTrophy.tier === 'bronze' ? '#cd7f32' :
-                                                   displayTrophy.tier === 'silver' ? '#c0c0c0' :
-                                                   displayTrophy.tier === 'gold' ? '#ffd700' :
-                                                   displayTrophy.tier === 'platinum' ? '#e5e4e2' :
-                                                   '#ff6b35',
-                                  borderRadius: '50%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '1.5rem',
-                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                  border: '2px solid #fff',
-                                  zIndex: 10,
-                                  cursor: 'help'
-                                }}
-                              >
-                                {displayTrophy.icon}
-                              </Box>
-                            </Tooltip>
-                          )}
-                          
-                          <CardActionArea 
-                            onClick={() => handleSelectDeck(deck)}
-                            sx={{ height: '100%', p: 2 }}
-                          >
-                            <CardContent>
-                              <Typography variant="h5" sx={{ color: '#0f258f', fontWeight: 'bold', mb: 1 }}>
-                                {deck.name}
+                          <CardContent>
+                            <Typography variant="h5" sx={{ color: '#0f258f', fontWeight: 'bold', mb: 1 }}>
+                              {deck.name}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#666', mb: 2 }}>
+                              {deck.description}
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Chip 
+                                label={deck.category} 
+                                size="small"
+                                sx={{ backgroundColor: '#0f258f', color: '#fff' }}
+                              />
+                              <Typography variant="caption" sx={{ color: '#999' }}>
+                                {deck.cards.length} cards
                               </Typography>
-                              <Typography variant="body2" sx={{ color: '#666', mb: 2 }}>
-                                {deck.description}
-                              </Typography>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Chip 
-                                  label={deck.category} 
-                                  size="small"
-                                  sx={{ backgroundColor: '#0f258f', color: '#fff' }}
-                                />
-                                <Typography variant="caption" sx={{ color: '#999' }}>
-                                  {deck.cards.length} cards
-                                </Typography>
-                              </Box>
-                            </CardContent>
-                          </CardActionArea>
-                        </Card>
-                      </Grid>
-                    );
-                  })}
+                            </Box>
+                          </CardContent>
+                        </CardActionArea>
+                      </Card>
+                    </Grid>
+                  ))}
               </Grid>
 
               <Box sx={{ textAlign: 'center', mt: 4 }}>
@@ -1512,93 +1334,6 @@ function Practice({ onReturnToStart }) {
           ) : practiceMode === 'study' && studyStarted ? (
             // Study Flashcard Display
             <Box>
-              {/* Fixed Timer Display - Top Right Corner */}
-              {!showSummary && sessionStartTime && (
-                <Box sx={{
-                  position: 'fixed',
-                  top: 80,
-                  right: 20,
-                  zIndex: 1000,
-                  backgroundColor: 'rgba(15, 37, 143, 0.95)',
-                  border: '2px solid rgba(255, 215, 0, 0.8)',
-                  borderRadius: 2,
-                  p: 2,
-                  minWidth: 200,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                }}>
-                  <Typography variant="caption" sx={{ color: '#ffd700', display: 'block', textAlign: 'center', mb: 0.5, fontWeight: 'bold' }}>
-                    ⏱️ SPEED CHALLENGE
-                  </Typography>
-                  
-                  {/* Current Card Time */}
-                  <Box sx={{ mb: 1, textAlign: 'center' }}>
-                    <Typography variant="caption" sx={{ color: '#ccc', display: 'block', fontSize: '0.7rem' }}>
-                      Current Card
-                    </Typography>
-                    <Typography variant="h5" sx={{
-                      color: (() => {
-                        if (currentCardElapsed <= 2.0) return '#4caf50';
-                        if (currentCardElapsed <= 3.0) return '#ff9800';
-                        return '#f44336';
-                      })(),
-                      fontWeight: 'bold',
-                      fontFamily: 'monospace'
-                    }}>
-                      {currentCardElapsed.toFixed(1)}s
-                    </Typography>
-                  </Box>
-
-                  {/* Average Time */}
-                  <Box sx={{ mb: 1, textAlign: 'center' }}>
-                    <Typography variant="caption" sx={{ color: '#ccc', display: 'block', fontSize: '0.7rem' }}>
-                      Average
-                    </Typography>
-                    <Typography variant="body1" sx={{
-                      color: '#f5f5f5',
-                      fontWeight: 'bold',
-                      fontFamily: 'monospace'
-                    }}>
-                      {(() => {
-                        if (cardTimes.length === 0) return '--';
-                        const avg = cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length;
-                        return `${avg.toFixed(2)}s`;
-                      })()}
-                    </Typography>
-                  </Box>
-
-                  {/* Gold Target */}
-                  <Box sx={{ 
-                    textAlign: 'center', 
-                    borderTop: '1px solid rgba(255, 215, 0, 0.3)',
-                    pt: 1
-                  }}>
-                    <Typography variant="caption" sx={{ color: '#ffd700', display: 'block', fontSize: '0.7rem' }}>
-                      🥇 Target: ≤2.00s
-                    </Typography>
-                    <Typography variant="caption" sx={{
-                      color: (() => {
-                        const avg = cardTimes.length > 0 
-                          ? cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length 
-                          : 0;
-                        if (avg === 0) return '#999';
-                        return avg <= 2.0 ? '#4caf50' : avg <= 3.0 ? '#ff9800' : '#f44336';
-                      })(),
-                      display: 'block',
-                      fontWeight: 'bold',
-                      mt: 0.5
-                    }}>
-                      {(() => {
-                        const avg = cardTimes.length > 0 
-                          ? cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length 
-                          : 0;
-                        if (avg === 0) return '--';
-                        return avg <= 2.0 ? '⚡ On Track!' : avg <= 3.0 ? '⚠️ Close' : '❌ Too Slow';
-                      })()}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
                 <Button
                   variant="outlined"
@@ -1770,43 +1505,6 @@ function Practice({ onReturnToStart }) {
                       p: 3,
                       minWidth: 150
                     }}>
-                      <Typography variant="h4" sx={{ color: '#f5f5f5', mb: 1 }}>
-                        ⏱️
-                      </Typography>
-                      <Typography variant="h4" sx={{ color: '#f5f5f5', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                        {(() => {
-                          if (cardTimes.length === 0) return '--';
-                          const avg = cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length;
-                          return `${avg.toFixed(2)}s`;
-                        })()}
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: '#f5f5f5' }}>
-                        Avg Time/Card
-                      </Typography>
-                      {cardTimes.length > 0 && (
-                        <Typography variant="caption" sx={{ 
-                          color: (() => {
-                            const avg = cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length;
-                            return avg <= 2.0 ? '#4caf50' : '#ff9800';
-                          })(),
-                          display: 'block',
-                          mt: 1,
-                          fontWeight: 'bold'
-                        }}>
-                          {(() => {
-                            const avg = cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length;
-                            return avg <= 2.0 ? '⚡ Gold Trophy Pace!' : `(Gold: ≤2.00s)`;
-                          })()}
-                        </Typography>
-                      )}
-                    </Box>
-                    
-                    <Box sx={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                      borderRadius: 2, 
-                      p: 3,
-                      minWidth: 150
-                    }}>
                       <Typography variant="h4" sx={{ color: '#f5f5f5', fontWeight: 'bold' }}>
                         {studyCards.length - correctCardIds.size - missedCardIds.size}
                       </Typography>
@@ -1968,14 +1666,6 @@ function Practice({ onReturnToStart }) {
           ) : null}
         </StyledPaper>
       </Container>
-
-      {/* Trophy Unlock Reveal */}
-      {showTrophyReveal && unlockedTrophies.length > 0 && (
-        <TrophyUnlockReveal
-          trophies={unlockedTrophies}
-          onContinue={handleTrophyRevealContinue}
-        />
-      )}
     </>
   );
 }
