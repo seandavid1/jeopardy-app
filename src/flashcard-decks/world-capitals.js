@@ -1,0 +1,66 @@
+// World Capitals Flash Cards
+export const worldCapitals = {
+  id: 'world-capitals',
+  name: 'World Capitals',
+  description: 'Learn the capital cities of countries around the world',
+  category: 'Geography',
+  cards: [
+    { id: 1, question: 'France', answer: 'Paris' },
+    { id: 2, question: 'Germany', answer: 'Berlin' },
+    { id: 3, question: 'Italy', answer: 'Rome' },
+    { id: 4, question: 'Spain', answer: 'Madrid' },
+    { id: 5, question: 'United Kingdom', answer: 'London' },
+    { id: 6, question: 'Japan', answer: 'Tokyo' },
+    { id: 7, question: 'China', answer: 'Beijing' },
+    { id: 8, question: 'India', answer: 'New Delhi' },
+    { id: 9, question: 'Brazil', answer: 'Brasília' },
+    { id: 10, question: 'Argentina', answer: 'Buenos Aires' },
+    { id: 11, question: 'Australia', answer: 'Canberra' },
+    { id: 12, question: 'Canada', answer: 'Ottawa' },
+    { id: 13, question: 'Mexico', answer: 'Mexico City' },
+    { id: 14, question: 'Russia', answer: 'Moscow' },
+    { id: 15, question: 'Egypt', answer: 'Cairo' },
+    { id: 16, question: 'South Africa', answer: 'Pretoria' },
+    { id: 17, question: 'Nigeria', answer: 'Abuja' },
+    { id: 18, question: 'Kenya', answer: 'Nairobi' },
+    { id: 19, question: 'South Korea', answer: 'Seoul' },
+    { id: 20, question: 'Thailand', answer: 'Bangkok' },
+    { id: 21, question: 'Indonesia', answer: 'Jakarta' },
+    { id: 22, question: 'Turkey', answer: 'Ankara' },
+    { id: 23, question: 'Greece', answer: 'Athens' },
+    { id: 24, question: 'Portugal', answer: 'Lisbon' },
+    { id: 25, question: 'Netherlands', answer: 'Amsterdam' },
+    { id: 26, question: 'Belgium', answer: 'Brussels' },
+    { id: 27, question: 'Switzerland', answer: 'Bern' },
+    { id: 28, question: 'Austria', answer: 'Vienna' },
+    { id: 29, question: 'Poland', answer: 'Warsaw' },
+    { id: 30, question: 'Sweden', answer: 'Stockholm' },
+    { id: 31, question: 'Norway', answer: 'Oslo' },
+    { id: 32, question: 'Denmark', answer: 'Copenhagen' },
+    { id: 33, question: 'Finland', answer: 'Helsinki' },
+    { id: 34, question: 'Czech Republic', answer: 'Prague' },
+    { id: 35, question: 'Hungary', answer: 'Budapest' },
+    { id: 36, question: 'Romania', answer: 'Bucharest' },
+    { id: 37, question: 'Ukraine', answer: 'Kyiv' },
+    { id: 38, question: 'Ireland', answer: 'Dublin' },
+    { id: 39, question: 'New Zealand', answer: 'Wellington' },
+    { id: 40, question: 'Chile', answer: 'Santiago' },
+    { id: 41, question: 'Peru', answer: 'Lima' },
+    { id: 42, question: 'Colombia', answer: 'Bogotá' },
+    { id: 43, question: 'Venezuela', answer: 'Caracas' },
+    { id: 44, question: 'Israel', answer: 'Jerusalem' },
+    { id: 45, question: 'Saudi Arabia', answer: 'Riyadh' },
+    { id: 46, question: 'UAE', answer: 'Abu Dhabi' },
+    { id: 47, question: 'Pakistan', answer: 'Islamabad' },
+    { id: 48, question: 'Bangladesh', answer: 'Dhaka' },
+    { id: 49, question: 'Vietnam', answer: 'Hanoi' },
+    { id: 50, question: 'Philippines', answer: 'Manila' },
+  ]
+};
+
+export default worldCapitals;
+
+
+
+
+

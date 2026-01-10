@@ -1,0 +1,66 @@
+// Nobel Prize in Literature Winners Flash Cards
+export const nobelPrizeLiterature = {
+  id: 'nobel-prize-literature',
+  name: 'Nobel Prize in Literature',
+  description: 'Learn Nobel Prize in Literature winners and their notable works',
+  category: 'Arts & Culture',
+  cards: [
+    { id: 1, question: 'Who won the Nobel Prize in Literature in 2024?', answer: 'Han Kang' },
+    { id: 2, question: 'Who won the Nobel Prize in Literature in 2023?', answer: 'Jon Fosse' },
+    { id: 3, question: 'Who won the Nobel Prize in Literature in 2022?', answer: 'Annie Ernaux' },
+    { id: 4, question: 'Who won the Nobel Prize in Literature in 2021?', answer: 'Abdulrazak Gurnah' },
+    { id: 5, question: 'Who won the Nobel Prize in Literature in 2020?', answer: 'Louise Glück' },
+    { id: 6, question: 'Who won the Nobel Prize in Literature in 2019?', answer: 'Peter Handke' },
+    { id: 7, question: 'Who won the Nobel Prize in Literature in 2018?', answer: 'Olga Tokarczuk' },
+    { id: 8, question: 'Who won the Nobel Prize in Literature in 2017?', answer: 'Kazuo Ishiguro' },
+    { id: 9, question: 'Who won the Nobel Prize in Literature in 2016?', answer: 'Bob Dylan' },
+    { id: 10, question: 'Who won the Nobel Prize in Literature in 2015?', answer: 'Svetlana Alexievich' },
+    { id: 11, question: 'Who won the Nobel Prize in Literature in 2014?', answer: 'Patrick Modiano' },
+    { id: 12, question: 'Who won the Nobel Prize in Literature in 2013?', answer: 'Alice Munro' },
+    { id: 13, question: 'Who won the Nobel Prize in Literature in 2012?', answer: 'Mo Yan' },
+    { id: 14, question: 'Who won the Nobel Prize in Literature in 2011?', answer: 'Tomas Tranströmer' },
+    { id: 15, question: 'Who won the Nobel Prize in Literature in 2010?', answer: 'Mario Vargas Llosa' },
+    { id: 16, question: 'Who won the Nobel Prize in Literature in 2009?', answer: 'Herta Müller' },
+    { id: 17, question: 'Who won the Nobel Prize in Literature in 2008?', answer: 'J.M.G. Le Clézio' },
+    { id: 18, question: 'Who won the Nobel Prize in Literature in 2007?', answer: 'Doris Lessing' },
+    { id: 19, question: 'Who won the Nobel Prize in Literature in 2006?', answer: 'Orhan Pamuk' },
+    { id: 20, question: 'Who won the Nobel Prize in Literature in 2005?', answer: 'Harold Pinter' },
+    { id: 21, question: 'Who won the Nobel Prize in Literature in 2004?', answer: 'Elfriede Jelinek' },
+    { id: 22, question: 'Who won the Nobel Prize in Literature in 2003?', answer: 'J.M. Coetzee' },
+    { id: 23, question: 'Who won the Nobel Prize in Literature in 2002?', answer: 'Imre Kertész' },
+    { id: 24, question: 'Who won the Nobel Prize in Literature in 2001?', answer: 'V.S. Naipaul' },
+    { id: 25, question: 'Who won the Nobel Prize in Literature in 2000?', answer: 'Gao Xingjian' },
+    { id: 26, question: 'Who won the Nobel Prize in Literature in 1999?', answer: 'Günter Grass' },
+    { id: 27, question: 'Who won the Nobel Prize in Literature in 1998?', answer: 'José Saramago' },
+    { id: 28, question: 'Who won the Nobel Prize in Literature in 1997?', answer: 'Dario Fo' },
+    { id: 29, question: 'Who won the Nobel Prize in Literature in 1996?', answer: 'Wisława Szymborska' },
+    { id: 30, question: 'Who won the Nobel Prize in Literature in 1995?', answer: 'Seamus Heaney' },
+    { id: 31, question: 'Who won the Nobel Prize in Literature in 1994?', answer: 'Kenzaburō Ōe' },
+    { id: 32, question: 'Who won the Nobel Prize in Literature in 1993?', answer: 'Toni Morrison' },
+    { id: 33, question: 'Who won the Nobel Prize in Literature in 1992?', answer: 'Derek Walcott' },
+    { id: 34, question: 'Who won the Nobel Prize in Literature in 1991?', answer: 'Nadine Gordimer' },
+    { id: 35, question: 'Who won the Nobel Prize in Literature in 1990?', answer: 'Octavio Paz' },
+    { id: 36, question: 'Who won the Nobel Prize in Literature in 1987?', answer: 'Joseph Brodsky' },
+    { id: 37, question: 'Who won the Nobel Prize in Literature in 1986?', answer: 'Wole Soyinka' },
+    { id: 38, question: 'Who won the Nobel Prize in Literature in 1982?', answer: 'Gabriel García Márquez' },
+    { id: 39, question: 'Who won the Nobel Prize in Literature in 1970?', answer: 'Aleksandr Solzhenitsyn' },
+    { id: 40, question: 'Who won the Nobel Prize in Literature in 1962?', answer: 'John Steinbeck' },
+    { id: 41, question: 'Who won the Nobel Prize in Literature in 1957?', answer: 'Albert Camus' },
+    { id: 42, question: 'Who won the Nobel Prize in Literature in 1954?', answer: 'Ernest Hemingway' },
+    { id: 43, question: 'Who won the Nobel Prize in Literature in 1950?', answer: 'Bertrand Russell' },
+    { id: 44, question: 'Who won the Nobel Prize in Literature in 1949?', answer: 'William Faulkner' },
+    { id: 45, question: 'Who won the Nobel Prize in Literature in 1948?', answer: 'T.S. Eliot' },
+    { id: 46, question: 'Who won the Nobel Prize in Literature in 1947?', answer: 'André Gide' },
+    { id: 47, question: 'Who won the Nobel Prize in Literature in 1946?', answer: 'Hermann Hesse' },
+    { id: 48, question: 'Who won the Nobel Prize in Literature in 1938?', answer: 'Pearl S. Buck' },
+    { id: 49, question: 'Who won the Nobel Prize in Literature in 1925?', answer: 'George Bernard Shaw' },
+    { id: 50, question: 'Who won the Nobel Prize in Literature in 1923?', answer: 'William Butler Yeats' },
+  ]
+};
+
+export default nobelPrizeLiterature;
+
+
+
+
+

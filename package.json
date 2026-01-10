@@ -1,0 +1,54 @@
+{
+  "name": "react",
+  "version": "0.0.0",
+  "private": true,
+  "homepage": "/jeopardy",
+  "dependencies": {
+    "@aws-sdk/client-polly": "^3.787.0",
+    "@aws-sdk/client-s3": "^3.787.0",
+    "@aws-sdk/polly-request-presigner": "^3.787.0",
+    "@aws-sdk/s3-request-presigner": "^3.787.0",
+    "@dicebear/collection": "^9.2.4",
+    "@dicebear/core": "^9.2.4",
+    "@emotion/react": "^11.5.0",
+    "@emotion/styled": "^11.3.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.11.12",
+    "@types/react": "^17.0.0 || ^18.0.0",
+    "ajv": "^8.17.1",
+    "axios": "^1.6.7",
+    "cheerio": "^1.0.0-rc.12",
+    "firebase": "^10.7.1",
+    "mongodb": "^6.5.0",
+    "openai": "^4.28.0",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "react-gamepads": "^1.0.0",
+    "react-query": "^3.39.3"
+  },
+  "scripts": {
+    "prestart": "rm -rf node_modules/.cache build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "scrape": "node src/api/runScraper.mjs",
+    "process-categories": "node src/utils/processQuestions.js"
+  },
+  "devDependencies": {
+    "react-scripts": "latest"
+  },
+  "proxy": "http://cluebase.lukelav.in",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+// US States and Capitals Flash Cards
+export const usStatesCapitals = {
+  id: 'us-states-capitals',
+  name: 'US States & Capitals',
+  description: 'Learn the capital cities of all 50 US states',
+  category: 'Geography',
+  cards: [
+    { id: 1, question: 'Alabama', answer: 'Montgomery' },
+    { id: 2, question: 'Alaska', answer: 'Juneau' },
+    { id: 3, question: 'Arizona', answer: 'Phoenix' },
+    { id: 4, question: 'Arkansas', answer: 'Little Rock' },
+    { id: 5, question: 'California', answer: 'Sacramento' },
+    { id: 6, question: 'Colorado', answer: 'Denver' },
+    { id: 7, question: 'Connecticut', answer: 'Hartford' },
+    { id: 8, question: 'Delaware', answer: 'Dover' },
+    { id: 9, question: 'Florida', answer: 'Tallahassee' },
+    { id: 10, question: 'Georgia', answer: 'Atlanta' },
+    { id: 11, question: 'Hawaii', answer: 'Honolulu' },
+    { id: 12, question: 'Idaho', answer: 'Boise' },
+    { id: 13, question: 'Illinois', answer: 'Springfield' },
+    { id: 14, question: 'Indiana', answer: 'Indianapolis' },
+    { id: 15, question: 'Iowa', answer: 'Des Moines' },
+    { id: 16, question: 'Kansas', answer: 'Topeka' },
+    { id: 17, question: 'Kentucky', answer: 'Frankfort' },
+    { id: 18, question: 'Louisiana', answer: 'Baton Rouge' },
+    { id: 19, question: 'Maine', answer: 'Augusta' },
+    { id: 20, question: 'Maryland', answer: 'Annapolis' },
+    { id: 21, question: 'Massachusetts', answer: 'Boston' },
+    { id: 22, question: 'Michigan', answer: 'Lansing' },
+    { id: 23, question: 'Minnesota', answer: 'Saint Paul' },
+    { id: 24, question: 'Mississippi', answer: 'Jackson' },
+    { id: 25, question: 'Missouri', answer: 'Jefferson City' },
+    { id: 26, question: 'Montana', answer: 'Helena' },
+    { id: 27, question: 'Nebraska', answer: 'Lincoln' },
+    { id: 28, question: 'Nevada', answer: 'Carson City' },
+    { id: 29, question: 'New Hampshire', answer: 'Concord' },
+    { id: 30, question: 'New Jersey', answer: 'Trenton' },
+    { id: 31, question: 'New Mexico', answer: 'Santa Fe' },
+    { id: 32, question: 'New York', answer: 'Albany' },
+    { id: 33, question: 'North Carolina', answer: 'Raleigh' },
+    { id: 34, question: 'North Dakota', answer: 'Bismarck' },
+    { id: 35, question: 'Ohio', answer: 'Columbus' },
+    { id: 36, question: 'Oklahoma', answer: 'Oklahoma City' },
+    { id: 37, question: 'Oregon', answer: 'Salem' },
+    { id: 38, question: 'Pennsylvania', answer: 'Harrisburg' },
+    { id: 39, question: 'Rhode Island', answer: 'Providence' },
+    { id: 40, question: 'South Carolina', answer: 'Columbia' },
+    { id: 41, question: 'South Dakota', answer: 'Pierre' },
+    { id: 42, question: 'Tennessee', answer: 'Nashville' },
+    { id: 43, question: 'Texas', answer: 'Austin' },
+    { id: 44, question: 'Utah', answer: 'Salt Lake City' },
+    { id: 45, question: 'Vermont', answer: 'Montpelier' },
+    { id: 46, question: 'Virginia', answer: 'Richmond' },
+    { id: 47, question: 'Washington', answer: 'Olympia' },
+    { id: 48, question: 'West Virginia', answer: 'Charleston' },
+    { id: 49, question: 'Wisconsin', answer: 'Madison' },
+    { id: 50, question: 'Wyoming', answer: 'Cheyenne' },
+  ]
+};
+
+export default usStatesCapitals;
+
+
+
+
+

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test localStorage</title></head>
+<body>
+<h1>Check Jeopardy Preferences</h1>
+<button onclick="checkPrefs()">Check Preferences</button>
+<button onclick="clearPrefs()">Clear Preferences</button>
+<pre id="output"></pre>
+<script>
+function checkPrefs() {
+  const prefs = localStorage.getItem('jeopardy_player_preferences');
+  document.getElementById('output').textContent = 'Stored preferences:\n' + (prefs || 'No preferences found');
+}
+function clearPrefs() {
+  localStorage.removeItem('jeopardy_player_preferences');
+  document.getElementById('output').textContent = 'Preferences cleared';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+// Poets & Poetry Flash Cards
+export const poetsPoetry = {
+  id: 'poets-poetry',
+  name: 'Poets & Poetry',
+  description: 'Learn famous poets, poems, and poetic forms',
+  category: 'Arts & Culture',
+  cards: [
+    // EASY - Most famous poets and poems
+    { id: 1, question: 'Who wrote "The Road Not Taken"?', answer: 'Robert Frost', difficulty: 'easy' },
+    { id: 2, question: 'Who wrote "The Raven"?', answer: 'Edgar Allan Poe', difficulty: 'easy' },
+    { id: 3, question: 'Who wrote "I Wandered Lonely as a Cloud" (Daffodils)?', answer: 'William Wordsworth', difficulty: 'easy' },
+    { id: 4, question: 'Who wrote "Stopping by Woods on a Snowy Evening"?', answer: 'Robert Frost', difficulty: 'easy' },
+    { id: 5, question: 'Who wrote "Howl"?', answer: 'Allen Ginsberg', difficulty: 'easy' },
+    { id: 6, question: 'Who wrote "The Waste Land"?', answer: 'T.S. Eliot', difficulty: 'easy' },
+    { id: 7, question: 'Who wrote "Do Not Go Gentle into That Good Night"?', answer: 'Dylan Thomas', difficulty: 'easy' },
+    { id: 8, question: 'Who wrote "Still I Rise"?', answer: 'Maya Angelou', difficulty: 'easy' },
+    { id: 9, question: 'Who wrote "The New Colossus" (on the Statue of Liberty)?', answer: 'Emma Lazarus', difficulty: 'easy' },
+    { id: 10, question: 'Who wrote "If—"?', answer: 'Rudyard Kipling', difficulty: 'easy' },
+    { id: 11, question: 'Who wrote "Annabel Lee"?', answer: 'Edgar Allan Poe', difficulty: 'easy' },
+    { id: 12, question: 'Who wrote "O Captain! My Captain!"?', answer: 'Walt Whitman', difficulty: 'easy' },
+    { id: 13, question: 'Who wrote "Leaves of Grass"?', answer: 'Walt Whitman', difficulty: 'easy' },
+    { id: 14, question: 'Who wrote "Ode to a Nightingale"?', answer: 'John Keats', difficulty: 'easy' },
+    { id: 15, question: 'Who wrote "The Tyger"?', answer: 'William Blake', difficulty: 'easy' },
+    
+    // MEDIUM - Well-known but requires literary knowledge
+    { id: 16, question: 'Who wrote "Ozymandias"?', answer: 'Percy Bysshe Shelley', difficulty: 'medium' },
+    { id: 17, question: 'Who wrote "Because I could not stop for Death"?', answer: 'Emily Dickinson', difficulty: 'medium' },
+    { id: 18, question: 'Who wrote "Invictus"?', answer: 'William Ernest Henley', difficulty: 'medium' },
+    { id: 19, question: 'Who wrote "The Love Song of J. Alfred Prufrock"?', answer: 'T.S. Eliot', difficulty: 'medium' },
+    { id: 20, question: 'Who wrote "I Know Why the Caged Bird Sings"?', answer: 'Maya Angelou', difficulty: 'medium' },
+    { id: 21, question: 'Who wrote "Dulce et Decorum Est"?', answer: 'Wilfred Owen', difficulty: 'medium' },
+    { id: 22, question: 'Who wrote "The Second Coming"?', answer: 'W.B. Yeats', difficulty: 'medium' },
+    { id: 23, question: 'Who wrote "To His Coy Mistress"?', answer: 'Andrew Marvell', difficulty: 'medium' },
+    { id: 24, question: 'Who wrote "The Hollow Men"?', answer: 'T.S. Eliot', difficulty: 'medium' },
+    { id: 25, question: 'Who wrote "Ode on a Grecian Urn"?', answer: 'John Keats', difficulty: 'medium' },
+    { id: 26, question: 'Who wrote "She Walks in Beauty"?', answer: 'Lord Byron', difficulty: 'medium' },
+    { id: 27, question: 'Who wrote "Jabberwocky"?', answer: 'Lewis Carroll', difficulty: 'medium' },
+    { id: 28, question: 'Who wrote "The Charge of the Light Brigade"?', answer: 'Alfred, Lord Tennyson', difficulty: 'medium' },
+    { id: 29, question: 'Who wrote "Dover Beach"?', answer: 'Matthew Arnold', difficulty: 'medium' },
+    { id: 30, question: 'Who wrote "A Dream Deferred" (Harlem)?', answer: 'Langston Hughes', difficulty: 'medium' },
+    { id: 31, question: 'Who wrote "Ode to the West Wind"?', answer: 'Percy Bysshe Shelley', difficulty: 'medium' },
+    { id: 32, question: 'Who wrote "When I Have Fears That I May Cease to Be"?', answer: 'John Keats', difficulty: 'medium' },
+    { id: 33, question: 'Who wrote "Howl" and was a Beat Generation poet?', answer: 'Allen Ginsberg', difficulty: 'medium' },
+    { id: 34, question: 'Who wrote "The Red Wheelbarrow"?', answer: 'William Carlos Williams', difficulty: 'medium' },
+    { id: 35, question: 'Who wrote "In Flanders Fields"?', answer: 'John McCrae', difficulty: 'medium' },
+    
+    // HARD - Obscure poets and works
+    { id: 36, question: 'Who wrote "The Canterbury Tales"?', answer: 'Geoffrey Chaucer', difficulty: 'hard' },
+    { id: 37, question: 'Who wrote "The Faerie Queene"?', answer: 'Edmund Spenser', difficulty: 'hard' },
+    { id: 38, question: 'Who wrote "Kubla Khan"?', answer: 'Samuel Taylor Coleridge', difficulty: 'hard' },
+    { id: 39, question: 'Who wrote "The Rime of the Ancient Mariner"?', answer: 'Samuel Taylor Coleridge', difficulty: 'hard' },
+    { id: 40, question: 'Who wrote "Sailing to Byzantium"?', answer: 'W.B. Yeats', difficulty: 'hard' },
+    { id: 41, question: 'Who wrote "Mending Wall"?', answer: 'Robert Frost', difficulty: 'hard' },
+    { id: 42, question: 'Who wrote "anyone lived in a pretty how town"?', answer: 'e.e. cummings', difficulty: 'hard' },
+    { id: 43, question: 'Who wrote "Daddy"?', answer: 'Sylvia Plath', difficulty: 'hard' },
+    { id: 44, question: 'Who wrote "Lady Lazarus"?', answer: 'Sylvia Plath', difficulty: 'hard' },
+    { id: 45, question: 'Who wrote "Ariel"?', answer: 'Sylvia Plath', difficulty: 'hard' },
+    { id: 46, question: 'Who wrote "The Wild Swans at Coole"?', answer: 'W.B. Yeats', difficulty: 'hard' },
+    { id: 47, question: 'Who wrote "Pied Beauty"?', answer: 'Gerard Manley Hopkins', difficulty: 'hard' },
+    { id: 48, question: 'Who wrote "Spring and Fall"?', answer: 'Gerard Manley Hopkins', difficulty: 'hard' },
+    { id: 49, question: 'Who wrote "The Canonization"?', answer: 'John Donne', difficulty: 'hard' },
+    { id: 50, question: 'Who wrote "A Valediction: Forbidding Mourning"?', answer: 'John Donne', difficulty: 'hard' },
+    { id: 51, question: 'Who wrote "My Last Duchess"?', answer: 'Robert Browning', difficulty: 'hard' },
+    { id: 52, question: 'Who wrote "Ulysses" (poem)?', answer: 'Alfred, Lord Tennyson', difficulty: 'hard' },
+    { id: 53, question: 'Who wrote "Auguries of Innocence"?', answer: 'William Blake', difficulty: 'hard' },
+    { id: 54, question: 'Who wrote "Fern Hill"?', answer: 'Dylan Thomas', difficulty: 'hard' },
+    { id: 55, question: 'Who wrote "The Convergence of the Twain"?', answer: 'Thomas Hardy', difficulty: 'hard' },
+    { id: 56, question: 'Who wrote "Lycidas"?', answer: 'John Milton', difficulty: 'hard' },
+    { id: 57, question: 'Who wrote "The Windhover"?', answer: 'Gerard Manley Hopkins', difficulty: 'hard' },
+    { id: 58, question: 'Who wrote "This Is Just to Say"?', answer: 'William Carlos Williams', difficulty: 'hard' },
+    { id: 59, question: 'Who wrote "Sunday Morning"?', answer: 'Wallace Stevens', difficulty: 'hard' },
+    { id: 60, question: 'Who wrote "Thirteen Ways of Looking at a Blackbird"?', answer: 'Wallace Stevens', difficulty: 'hard' },
+    { id: 61, question: 'What is a 14-line poem with a specific rhyme scheme?', answer: 'Sonnet', difficulty: 'hard' },
+    { id: 62, question: 'What is a 5-line humorous poem?', answer: 'Limerick', difficulty: 'hard' },
+    { id: 63, question: 'What is a 3-line Japanese poem with 5-7-5 syllables?', answer: 'Haiku', difficulty: 'hard' },
+    { id: 64, question: 'What is a long narrative poem about heroic deeds?', answer: 'Epic', difficulty: 'hard' },
+    { id: 65, question: 'What is a poem of mourning or lamentation?', answer: 'Elegy', difficulty: 'hard' },
+  ]
+};
+
+export default poetsPoetry;
+
+
+
+
