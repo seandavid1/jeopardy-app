@@ -408,7 +408,7 @@ function TrophyCase({ onBack }) {
                 fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' }
               }}
             >
-              Trophy Case
+              🏆 Trophy Case 🏆
             </Typography>
             <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.9)', mb: 3 }}>
               {stats?.unlocked || 0} of {stats?.total || 0} Trophies Unlocked
