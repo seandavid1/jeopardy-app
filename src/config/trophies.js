@@ -106,14 +106,14 @@ FLASHCARD_DECKS.forEach(deck => {
   flashcardTrophies.push({
     id: `flashcard-speed-${deck.id}`,
     name: `${deck.name} Gold`,
-    description: `Perfect score on ${deck.name} under time limit (2.0s per card)`,
+    description: `Perfect score on ${deck.name} under time limit (2.5s per card)`,
     icon: '🥇',
     tier: TROPHY_TIERS.GOLD,
     category: TROPHY_CATEGORIES.FLASHCARDS,
     condition: {
       type: 'flashcard_speed',
       deckId: deck.id,
-      maxSecondsPerCard: 2.0
+      maxSecondsPerCard: 2.5
     }
   });
 });

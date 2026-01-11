@@ -526,11 +526,13 @@ function Practice({ onReturnToStart }) {
       newSet.delete(currentCard.id); // Remove from missed if it was there
       
       // If this is the last card and we have no misses, check for trophy
-      if (isLastCard && user && newSet.size === 0) {
+      // BUT ONLY if this is NOT a review session (first pass only)
+      if (isLastCard && user && newSet.size === 0 && !isReviewMode) {
         // Use setTimeout to ensure state has updated and summary is showing
         setTimeout(async () => {
           try {
             console.log('🏆 Last card marked correct! Checking for flashcard trophy unlock...');
+            console.log('🏆 Review mode:', isReviewMode, '(trophies only awarded on first pass)');
             
             // Calculate final timing stats (include current card time)
             const allCardTimes = currentCardTime ? [...cardTimes, currentCardTime] : cardTimes;
@@ -544,6 +546,7 @@ function Practice({ onReturnToStart }) {
             console.log('  - Total cards:', studyCards.length);
             console.log('  - Selected deck:', selectedDeck?.id);
             console.log('  - Is reversed:', isReversed);
+            console.log('  - Is review mode:', isReviewMode);
             console.log('  - Average time per card:', averageSecondsPerCard ? `${averageSecondsPerCard.toFixed(2)}s` : 'N/A');
             
             // Record the completion in Firebase (with timing)
@@ -576,6 +579,9 @@ function Practice({ onReturnToStart }) {
             console.error('Error checking flashcard trophies:', error);
           }
         }, 100);
+      } else if (isLastCard && user && newSet.size === 0 && isReviewMode) {
+        // Perfect score but in review mode - no trophy
+        console.log('✅ Perfect score, but in review mode. Trophies only awarded on first pass through deck.');
       }
       
       return newSet;
@@ -1530,69 +1536,74 @@ function Practice({ onReturnToStart }) {
                     ⏱️ SPEED CHALLENGE
                   </Typography>
                   
-                  {/* Current Card Time */}
+                  {/* Total Elapsed Time */}
                   <Box sx={{ mb: 1, textAlign: 'center' }}>
                     <Typography variant="caption" sx={{ color: '#ccc', display: 'block', fontSize: '0.7rem' }}>
-                      Current Card
+                      Current Time
                     </Typography>
                     <Typography variant="h5" sx={{
                       color: (() => {
-                        if (currentCardElapsed <= 2.0) return '#4caf50';
-                        if (currentCardElapsed <= 3.0) return '#ff9800';
+                        const totalElapsed = cardTimes.reduce((sum, t) => sum + t, 0) + currentCardElapsed;
+                        const targetTotal = studyCards.length * 2.5;
+                        if (totalElapsed <= targetTotal) return '#4caf50';
+                        if (totalElapsed <= targetTotal * 1.5) return '#ff9800';
                         return '#f44336';
                       })(),
                       fontWeight: 'bold',
                       fontFamily: 'monospace'
                     }}>
-                      {currentCardElapsed.toFixed(1)}s
+                      {(() => {
+                        const totalElapsed = cardTimes.reduce((sum, t) => sum + t, 0) + currentCardElapsed;
+                        return `${totalElapsed.toFixed(1)}s`;
+                      })()}
                     </Typography>
                   </Box>
 
-                  {/* Average Time */}
+                  {/* Target Total Time */}
                   <Box sx={{ mb: 1, textAlign: 'center' }}>
                     <Typography variant="caption" sx={{ color: '#ccc', display: 'block', fontSize: '0.7rem' }}>
-                      Average
+                      Target Time
                     </Typography>
                     <Typography variant="body1" sx={{
                       color: '#f5f5f5',
                       fontWeight: 'bold',
                       fontFamily: 'monospace'
                     }}>
-                      {(() => {
-                        if (cardTimes.length === 0) return '--';
-                        const avg = cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length;
-                        return `${avg.toFixed(2)}s`;
-                      })()}
+                      {(studyCards.length * 2.5).toFixed(1)}s
                     </Typography>
                   </Box>
 
-                  {/* Gold Target */}
+                  {/* Status */}
                   <Box sx={{ 
                     textAlign: 'center', 
                     borderTop: '1px solid rgba(255, 215, 0, 0.3)',
                     pt: 1
                   }}>
                     <Typography variant="caption" sx={{ color: '#ffd700', display: 'block', fontSize: '0.7rem' }}>
-                      🥇 Target: ≤2.00s
+                      🥇 Goal: 2.50s per card
                     </Typography>
                     <Typography variant="caption" sx={{
                       color: (() => {
-                        const avg = cardTimes.length > 0 
-                          ? cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length 
-                          : 0;
-                        if (avg === 0) return '#999';
-                        return avg <= 2.0 ? '#4caf50' : avg <= 3.0 ? '#ff9800' : '#f44336';
+                        const totalElapsed = cardTimes.reduce((sum, t) => sum + t, 0) + currentCardElapsed;
+                        const targetTotal = studyCards.length * 2.5;
+                        const diff = targetTotal - totalElapsed;
+                        if (diff >= 0) return '#4caf50';
+                        if (diff >= -5) return '#ff9800';
+                        return '#f44336';
                       })(),
                       display: 'block',
                       fontWeight: 'bold',
                       mt: 0.5
                     }}>
                       {(() => {
-                        const avg = cardTimes.length > 0 
-                          ? cardTimes.reduce((sum, t) => sum + t, 0) / cardTimes.length 
-                          : 0;
-                        if (avg === 0) return '--';
-                        return avg <= 2.0 ? '⚡ On Track!' : avg <= 3.0 ? '⚠️ Close' : '❌ Too Slow';
+                        const totalElapsed = cardTimes.reduce((sum, t) => sum + t, 0) + currentCardElapsed;
+                        const targetTotal = studyCards.length * 2.5;
+                        const diff = targetTotal - totalElapsed;
+                        if (diff >= 0) {
+                          return `✓ ${diff.toFixed(1)}s ahead`;
+                        } else {
+                          return `⚠ ${Math.abs(diff).toFixed(1)}s behind`;
+                        }
                       })()}
                     </Typography>
                   </Box>

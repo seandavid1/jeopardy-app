@@ -12,12 +12,14 @@ import {
   Chip,
   CircularProgress,
   LinearProgress,
-  Tooltip
+  Tooltip,
+  IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LockIcon from '@mui/icons-material/Lock';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserTrophyCase, getTrophyStats } from '../services/trophyService';
 import { TROPHY_CATEGORIES, getTrophyColor } from '../config/trophies';
@@ -109,14 +111,142 @@ function TrophyCase({ onBack }) {
     }
   };
 
-  // DEBUG: Reset all trophies (lock them back)
+  // Reset a single trophy
+  const handleResetSingleTrophy = async (trophy, event) => {
+    // Prevent event bubbling
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    
+    console.log('🔄 Reset button clicked for trophy:', trophy.name, trophy.trophyId);
+    
+    if (!user) {
+      console.error('No user logged in');
+      alert('You must be logged in to reset trophies.');
+      return;
+    }
+    
+    if (!window.confirm(`Reset "${trophy.name}"? This will lock the trophy and clear related completion data.`)) {
+      console.log('User cancelled reset');
+      return;
+    }
+    
+    try {
+      console.log('Starting trophy reset...');
+      const { db } = await import('../firebase-config');
+      const { doc, updateDoc, getDoc } = await import('firebase/firestore');
+      
+      setLoading(true);
+      
+      // Update the trophy case to lock this specific trophy
+      const trophyCaseRef = doc(db, 'trophy_cases', user.uid);
+      const trophyCaseDoc = await getDoc(trophyCaseRef);
+      
+      console.log('Trophy case doc exists:', trophyCaseDoc.exists());
+      
+      if (trophyCaseDoc.exists()) {
+        const data = trophyCaseDoc.data();
+        const updatedTrophies = data.trophies.map(t => {
+          if (t.trophyId === trophy.trophyId) {
+            console.log('Locking trophy:', t.trophyId);
+            return {
+              ...t,
+              isUnlocked: false,
+              unlockedAt: null
+            };
+          }
+          return t;
+        });
+        
+        await updateDoc(trophyCaseRef, { trophies: updatedTrophies });
+        console.log('Trophy case updated');
+      }
+      
+      // If it's a flashcard trophy, clear the related completion data
+      console.log('Trophy category:', trophy.category);
+      if (trophy.category === 'Flashcards' && trophy.trophyId) {
+        // Extract deckId from trophy ID (format: flashcard-perfect-{deckId} or flashcard-speed-{deckId} or flashcard-perfect-both-{deckId})
+        let deckId = null;
+        if (trophy.trophyId.startsWith('flashcard-perfect-both-')) {
+          deckId = trophy.trophyId.replace('flashcard-perfect-both-', '');
+        } else if (trophy.trophyId.startsWith('flashcard-perfect-')) {
+          deckId = trophy.trophyId.replace('flashcard-perfect-', '');
+        } else if (trophy.trophyId.startsWith('flashcard-speed-')) {
+          deckId = trophy.trophyId.replace('flashcard-speed-', '');
+        }
+        
+        console.log('Extracted deckId:', deckId);
+        
+        if (deckId) {
+          const completionId = `${user.uid}_${deckId}`;
+          const completionRef = doc(db, 'flashcard_completions', completionId);
+          const completionDoc = await getDoc(completionRef);
+          
+          console.log('Completion doc exists:', completionDoc.exists());
+          
+          if (completionDoc.exists()) {
+            // Determine what to clear based on trophy type
+            if (trophy.trophyId.startsWith('flashcard-perfect-both-')) {
+              // Silver trophy - clear both directions
+              console.log('Clearing both directions for Silver trophy');
+              await updateDoc(completionRef, {
+                forwardCompletedAt: null,
+                reversedCompletedAt: null,
+                bestForwardSecondsPerCard: null,
+                bestReversedSecondsPerCard: null,
+                bestForwardCompletedAt: null,
+                bestReversedCompletedAt: null
+              });
+            } else if (trophy.trophyId.startsWith('flashcard-speed-')) {
+              // Gold trophy - clear speed records only
+              console.log('Clearing speed records for Gold trophy');
+              await updateDoc(completionRef, {
+                bestForwardSecondsPerCard: null,
+                bestReversedSecondsPerCard: null,
+                bestForwardCompletedAt: null,
+                bestReversedCompletedAt: null
+              });
+            } else {
+              // Bronze trophy - clear all completion data
+              console.log('Clearing all completion data for Bronze trophy');
+              await updateDoc(completionRef, {
+                forwardCompletedAt: null,
+                reversedCompletedAt: null,
+                bestForwardSecondsPerCard: null,
+                bestReversedSecondsPerCard: null,
+                bestForwardCompletedAt: null,
+                bestReversedCompletedAt: null
+              });
+            }
+            
+            console.log(`🗑️ Cleared completion data for deck: ${deckId}`);
+          }
+        }
+      }
+      
+      // Reload trophy case
+      console.log('Reloading trophy case...');
+      await loadTrophyCase();
+      
+      alert(`Trophy "${trophy.name}" has been reset!`);
+      console.log('✅ Trophy reset complete!');
+    } catch (error) {
+      console.error('Error resetting trophy:', error);
+      alert(`Error resetting trophy: ${error.message}. Check console for details.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // DEBUG: Reset all trophies (lock them back) and clear flashcard completions
   const handleResetTrophies = async () => {
-    if (!user || !window.confirm('This will lock all trophies. Continue?')) return;
+    if (!user || !window.confirm('This will lock all trophies AND clear all flashcard completion data. Continue?')) return;
     
     try {
       const { initializeTrophyCase } = await import('../services/trophyService');
       const { db } = await import('../firebase-config');
-      const { doc, deleteDoc } = await import('firebase/firestore');
+      const { doc, deleteDoc, collection, query, where, getDocs } = await import('firebase/firestore');
       
       setLoading(true);
       
@@ -124,13 +254,26 @@ function TrophyCase({ onBack }) {
       const trophyCaseRef = doc(db, 'trophy_cases', user.uid);
       await deleteDoc(trophyCaseRef);
       
+      // Delete all flashcard completions for this user
+      const completionsRef = collection(db, 'flashcard_completions');
+      const q = query(completionsRef, where('userId', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      
+      const deletePromises = [];
+      querySnapshot.forEach((doc) => {
+        deletePromises.push(deleteDoc(doc.ref));
+      });
+      await Promise.all(deletePromises);
+      
+      console.log(`Deleted ${deletePromises.length} flashcard completion records`);
+      
       // Re-initialize with all locked
       await initializeTrophyCase(user.uid);
       
       // Reload trophy case
       await loadTrophyCase();
       
-      alert('All trophies reset to locked!');
+      alert(`All trophies reset to locked!\nCleared ${deletePromises.length} flashcard completion records.`);
     } catch (error) {
       console.error('Error resetting trophies:', error);
       alert('Error resetting trophies. Check console.');
@@ -145,10 +288,10 @@ function TrophyCase({ onBack }) {
     if (!trophyCase) return [];
 
     switch (selectedTab) {
-      case 0: // All
-        return trophyCase.trophies;
-      case 1: // Unlocked
+      case 0: // Unlocked (moved to first)
         return trophyCase.trophies.filter(t => t.isUnlocked);
+      case 1: // All (moved to second)
+        return trophyCase.trophies;
       case 2: // Locked
         return trophyCase.trophies.filter(t => !t.isUnlocked);
       case 3: // Special
@@ -315,8 +458,8 @@ function TrophyCase({ onBack }) {
                 }
               }}
             >
-              <Tab label={`All (${trophyCase?.trophies.length || 0})`} />
               <Tab label={`Unlocked (${stats?.unlocked || 0})`} />
+              <Tab label={`All (${trophyCase?.trophies.length || 0})`} />
               <Tab label={`Locked (${stats?.locked || 0})`} />
               <Tab label="Special" />
               <Tab label="CPU Victories" />
@@ -347,6 +490,30 @@ function TrophyCase({ onBack }) {
                       }}>
                         <LockIcon sx={{ fontSize: '1.5rem', color: '#999' }} />
                       </Box>
+                    )}
+                    
+                    {/* Reset Button - Only show in development mode and if trophy is unlocked */}
+                    {process.env.NODE_ENV === 'development' && trophy.isUnlocked && (
+                      <Tooltip title="Reset this trophy" arrow>
+                        <IconButton
+                          onClick={(e) => handleResetSingleTrophy(trophy, e)}
+                          sx={{
+                            position: 'absolute',
+                            top: 5,
+                            right: 5,
+                            backgroundColor: 'rgba(211, 47, 47, 0.9)',
+                            color: '#fff',
+                            width: 32,
+                            height: 32,
+                            zIndex: 10,
+                            '&:hover': {
+                              backgroundColor: '#d32f2f',
+                            }
+                          }}
+                        >
+                          <RestartAltIcon sx={{ fontSize: '1.2rem' }} />
+                        </IconButton>
+                      </Tooltip>
                     )}
 
                     {/* Trophy Icon */}
